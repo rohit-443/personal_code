@@ -25,6 +25,12 @@ this is the sample mail report (intentionally cropped as it might be taking as f
 
 <img width="532" height="611" alt="image" src="https://github.com/user-attachments/assets/5a2ad208-c403-49a9-a7e7-e5b2e58cbdb6" />
 
+
+ **below given is the 3 years historical testing report shown.**
+ 
+ <img width="1290" height="692" alt="image" src="https://github.com/user-attachments/assets/b8982c11-db26-46e7-a417-cc4c7f55c80e" />
+
+
 2.) The plots will be generated based on the 3 years data of every shortlisted stock and it will be uploaded to the personal drive automatically.
 <img width="1496" height="451" alt="image" src="https://github.com/user-attachments/assets/4a54b58c-975a-4729-8be9-33bbaa81a4c9" />
 
