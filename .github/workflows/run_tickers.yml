@@ -1,36 +1,39 @@
-name: Incremental Ticker Update
+name: Ticker Data Sync
 
 on:
   schedule:
-    - cron: '0 2 * * *' # Runs at 2 AM UTC (after markets close)
-  workflow_dispatch:
+    - cron: '0 0 * * *'
+  workflow_dispatch: 
 
 jobs:
-  update_data:
+  update-csv:
     runs-on: ubuntu-latest
+    # This acts as your "credential" to write to the repo
     permissions:
-      contents: write
+      contents: write 
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1 # Only need the latest version
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install Libs
         run: pip install yfinance pandas
 
-      - name: Run Incremental Script
-        run: python incremental_update.py
+      - name: Run Data Collection
+        run: python process_tickers.py
 
       - name: Commit and Push
         run: |
+          # These tell GitHub who is making the change
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add all_tickers_3_years_history.csv
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Incremental Update $(date +'%Y-%m-%d')" && git push)
+          
+          # Only commit if the file was actually created/changed
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Initial Historical Load" && git push)
