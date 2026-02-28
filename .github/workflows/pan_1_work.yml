@@ -3,9 +3,9 @@ name: Scheduled Stock Analysis
 on:
   push:
     branches:
-      - pan_1_ready_for_git
+      - main
   schedule:
-    - cron: '0 0 * * 1-5' # Runs everyday at midnight UTC, adjust as needed
+    - cron: '30 12 * * *' # Runs everyday at 12:30 PM UTC (6:00 PM IST)
   workflow_dispatch:
 
 jobs:
