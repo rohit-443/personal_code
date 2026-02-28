@@ -149,9 +149,9 @@ for i in tickers:
 
 # After the loop, data_df_filtered will contain the appended data from all tickers
 print("Combined Filtered Data:")
-display(data_df_filtered.head())
+print(data_df_filtered.head())
 print("\nCombined Filtered Data Shape:")
-display(data_df_filtered.shape)
+print(data_df_filtered.shape)
 
 # Assuming data_df_filtered is the DataFrame you want to save
 data_df_filtered.to_csv('5_days_history.csv', index=False)
@@ -178,15 +178,15 @@ source_df['Date'] = pd.to_datetime(source_df['Date'], errors='coerce')
 
 # Display the head and dtypes to verify
 print("Source DataFrame (Pandas):")
-display(source_df.head())
+print(source_df.head())
 print("\nSource DataFrame dtypes:")
-display(source_df.dtypes)
+print(source_df.dtypes)
 
 target_df = ticker_price_history_df.copy()
 print("Source DataFrame (Pandas):")
-display(target_df.head())
+print(target_df.head())
 print("\nSource DataFrame dtypes:")
-display(target_df.dtypes)
+print(target_df.dtypes)
 
 # Perform a full outer join using pandas merge
 # Use indicator=True to see the origin of each row ('left_only', 'right_only', 'both')
@@ -214,11 +214,11 @@ print("Max Date:", merged_df_pandas["Date"].max())
 # Ensure the column order is consistent with the original Spark DataFrame if needed
 # For now, let's display the head of the merged DataFrame to verify
 print("Merged DataFrame (Pandas):")
-display(merged_df_pandas.head())
+print(merged_df_pandas.head())
 print("\nMerged DataFrame Shape (Pandas):")
-display(merged_df_pandas.shape)
+print(merged_df_pandas.shape)
 print("\nMerged DataFrame dtypes (Pandas):")
-display(merged_df_pandas.dtypes)
+print(merged_df_pandas.dtypes)
 
 ticker_final_df = merged_df_pandas.copy()
 
@@ -317,9 +317,9 @@ for i in tickers:
 
 # Now combined_tick_df contains the data for all tickers with SMA values and new indicators
 print("Combined DataFrame with Indicators:")
-display(combined_tick_df.head())
+print(combined_tick_df.head())
 print("\nCombined DataFrame Shape:")
-display(combined_tick_df.shape)
+print(combined_tick_df.shape)
 
 # For min and max dates across all tickers in the final combined DataFrame
 print("\nMin Date:", combined_tick_df["Date"].min())
@@ -361,7 +361,7 @@ for ticker in combined_tick_df['Ticker'].unique():
     filtered_tickers_df = pd.concat([filtered_tickers_df, filtered_df], ignore_index=True)
 
 # Display the tickers and dates that meet the criteria
-display(filtered_tickers_df[['Date', 'Ticker', 'RSI', 'MACD', 'MACD_Signal', 'Williams_%R', 'cci']]) # Added CCI to display
+print(filtered_tickers_df[['Date', 'Ticker', 'RSI', 'MACD', 'MACD_Signal', 'Williams_%R', 'cci']]) # Added CCI to display
 
 latest_two_days_df = pd.DataFrame()
 
@@ -447,7 +447,7 @@ for ticker in latest_two_days_df['Ticker'].unique():
     filtered_latest_two_days_df = pd.concat([filtered_latest_two_days_df, filtered_df], ignore_index=True)
 
 # Display the tickers, dates, and recommendations
-display(filtered_latest_two_days_df[['Date', 'Ticker', 'RSI', 'MACD', 'MACD_Signal', 'Williams_%R', 'cci', 'satisfied_conditions_count', 'Recommendation', 'Satisfied_Conditions_Description']])
+print(filtered_latest_two_days_df[['Date', 'Ticker', 'RSI', 'MACD', 'MACD_Signal', 'Williams_%R', 'cci', 'satisfied_conditions_count', 'Recommendation', 'Satisfied_Conditions_Description']])
 
 """# Task
 Send an email to "jonnadularohit@gmail.com" containing the shortlisted tickers from the `filtered_latest_two_days_df` DataFrame and their corresponding technical indicator plots, using the Gmail address and app password stored in Colab secrets.
@@ -600,9 +600,9 @@ historical_picks_df = pd.DataFrame(historical_picks)
 
 # Display the historical picks
 print("Historical Picks (Ticker-Specific Backtesting):")
-display(historical_picks_df.head())
+print(historical_picks_df.head())
 print("\nTotal Historical Picks:")
-display(historical_picks_df.shape)
+print(historical_picks_df.shape)
 
 """# Task
 Visualize the cumulative returns of each recommendation type based on the historical picks.
@@ -657,7 +657,7 @@ for index, row in historical_picks_df.iterrows():
 
 
 # Display the updated DataFrame with returns and target dates
-display(historical_picks_df.head())
+print(historical_picks_df.head())
 
 # Analyze performance metrics grouped by Ticker and Recommendation Type
 performance_metrics_by_ticker_recommendation = {}
@@ -707,7 +707,7 @@ performance_metrics_by_ticker_recommendation_df.index.names = ['Ticker', 'Recomm
 
 # Display the performance metrics grouped by Ticker and Recommendation Type
 print("\nPerformance Metrics by Ticker, Recommendation Type, and Year:")
-display(performance_metrics_by_ticker_recommendation_df)
+print(performance_metrics_by_ticker_recommendation_df)
 
 """## Backtesting Analysis for New Signal Conditions
 
@@ -943,7 +943,7 @@ else:
 
 # Display the winning percentages for each signal, grouped by ticker
 print("Winning Percentage for New Signal Conditions (Grouped by Ticker):")
-display(signal_performance_by_ticker_df)
+print(signal_performance_by_ticker_df)
 
 """## Identify Latest New Signals Triggered by Shortlisted Tickers
 
