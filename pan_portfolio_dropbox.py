@@ -1,3 +1,5 @@
+import pandas as pd
+pd.options.mode.chained_assignment = None
 # -*- coding: utf-8 -*-
 """pan_portfolio_drive_stock_short_term_indicators_grouped_yearly.ipynb
 
