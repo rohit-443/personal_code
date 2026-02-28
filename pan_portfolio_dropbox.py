@@ -1599,9 +1599,8 @@ if not filtered_latest_two_days_df.empty:
 
     # Add the instruction/link to the Dropbox folder
     dropbox_link_instruction = f"Please find the technical analysis plots in the Dropbox shared folder: <a href='{folder_link}'>{folder_link}</a>"
-    email_body += f"<p>{dropbox_link_instruction}</p>
-
-"    # Add technical indicator significance (reusing from 4c0258a2)
+    email_body += f"<p>{dropbox_link_instruction}</p>\n\n"
+    # Add technical indicator significance (reusing from 4c0258a2)
     email_body += "<h2>Technical Indicator Significance</h2>\n"
     email_body += "<p>Here is a brief explanation of the technical indicators used in the analysis and plots:</p>\n"
     email_body += "<ul>\n"
