@@ -23,7 +23,17 @@ jobs:
         run: pip install yfinance pandas
 
       - name: Run Data Collection
-        run: python process_tickers.py
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+        run: |
+          python process_tickers.py
+          python pan_portfolio_dropbox.py
+          python pan_1_portfolio_dropbox.py
+          python pan_2_portfolio_dropbox.py
 
       - name: Commit and Push
         run: |
@@ -31,7 +41,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add all_tickers_3_years_history.csv
+          git add all_tickers_3_years_history.csv pan1_2year_history.csv pan2_2year_history.csv
           
           # Only commit if the file was actually created/changed
           git diff --quiet && git diff --staged --quiet || (git commit -m "Initial Historical Load" && git push)

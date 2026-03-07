@@ -32,7 +32,7 @@ dtype_dict_hist = {
     "High": float,
     "Low": float,
     "Open": float,
-    "Volume": int,
+    "Volume": "Int64",
     "Ticker": str
 }
 
@@ -156,8 +156,8 @@ print("\nCombined Filtered Data Shape:")
 print(data_df_filtered.shape)
 
 # Assuming data_df_filtered is the DataFrame you want to save
-data_df_filtered.to_csv('5_days_history.csv', index=False)
-print("data_df_filtered saved to '5_days_history.csv'")
+data_df_filtered.to_csv('5_days_history_pan.csv', index=False)
+print("data_df_filtered saved to '5_days_history_pan.csv'")
 
 import pandas as pd
 
@@ -173,10 +173,10 @@ dtypes = {
 }
 
 # Load the 5_days_history.csv into a pandas DataFrame with defined dtypes
-source_df = pd.read_csv("5_days_history.csv", dtype=dtypes)
+source_df = pd.read_csv("5_days_history_pan.csv", dtype=dtypes)
 
-# Convert the 'Date' column to datetime objects after loading
-source_df['Date'] = pd.to_datetime(source_df['Date'], errors='coerce')
+# Convert the 'Date' column to datetime objects after loading and strip timezones
+source_df['Date'] = pd.to_datetime(source_df['Date'], utc=True, errors='coerce').dt.normalize().dt.tz_localize(None)
 
 # Display the head and dtypes to verify
 print("Source DataFrame (Pandas):")
@@ -185,6 +185,7 @@ print("\nSource DataFrame dtypes:")
 print(source_df.dtypes)
 
 target_df = ticker_price_history_df.copy()
+target_df['Date'] = pd.to_datetime(target_df['Date'], utc=True, errors='coerce').dt.normalize().dt.tz_localize(None)
 print("Source DataFrame (Pandas):")
 print(target_df.head())
 print("\nSource DataFrame dtypes:")
@@ -1529,9 +1530,10 @@ import os
 from datetime import datetime
 
 # Email details
-sender_email = gmail_address
+email_list = [e.strip() for e in gmail_address.split(",")]
+sender_email = email_list[0] # The first email logs into SMTP
 sender_password = gmail_app_password
-receiver_email = gmail_address # Define the receiver email here
+receiver_emails = email_list # Send to everyone in the secret
 subject = "Performance Reports for Shortlisted Tickers" # Updated subject
 
 # Prepare the email body with the shortlisted tickers data and performance metrics
@@ -1624,7 +1626,7 @@ else:
 # Create the MIMEMultipart message
 msg = MIMEMultipart() # Re-initialize msg
 msg['From'] = sender_email
-msg['To'] = receiver_email
+msg['To'] = ", ".join(receiver_emails)
 msg['Subject'] = subject
 msg.attach(MIMEText(email_body, 'html'))
 
@@ -1635,7 +1637,7 @@ msg.attach(MIMEText(email_body, 'html'))
 try:
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(sender_email, sender_password)
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.sendmail(sender_email, receiver_emails, msg.as_string())
     print("Email with performance reports and Dropbox link sent successfully!")
 
 except Exception as e:
