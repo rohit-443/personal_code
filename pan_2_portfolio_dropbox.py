@@ -26,7 +26,7 @@ gmail_address = os.environ.get('GMAIL_ADDRESS')
 gmail_app_password = os.environ.get('GMAIL_APP_PASSWORD')
 
 print("Gmail address retrieved.")
-
+cols_to_read = ['Date', 'Ticker', 'Close', 'High', 'Low', 'Open', 'Volume']
 dtype_dict_hist = {
     "Close": float,
     "High": float,
@@ -37,7 +37,7 @@ dtype_dict_hist = {
 }
 
 parse_dates_hist = ["Date"]
-ticker_price_history_df= pd.read_csv("pan2_2year_history.csv", dtype= dtype_dict_hist, parse_dates=parse_dates_hist)
+ticker_price_history_df= pd.read_csv("pan2_2year_history.csv", usecols= cols_to_read,  dtype= dtype_dict_hist, parse_dates=parse_dates_hist)
 
 
 import pandas as pd
@@ -136,6 +136,7 @@ merged_df_pandas = merged_df_pandas.drop(columns=[f'{col}_target' for col in ['C
 
 
 # Save the merged pandas DataFrame to CSV
+merged_df_pandas= merged_df_pandas[cols_to_read]
 merged_df_pandas.to_csv("pan2_2year_history.csv", index=False)
 
 # Display the min and max dates
