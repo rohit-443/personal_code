@@ -20,7 +20,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Libs
-        run: pip install yfinance pandas
+        run: pip install yfinance pandas google-generativeai
 
       - name: Run Data Collection
         env:
@@ -29,11 +29,13 @@ jobs:
           DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
           DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
           DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          ticker_fomo_news_gemini_api: ${{ secrets.ticker_fomo_news_gemini_api }}
         run: |
           python process_tickers.py
           python pan_portfolio_dropbox.py
           python pan_1_portfolio_dropbox.py
           python pan_2_portfolio_dropbox.py
+          python ai_recommendation.py
 
       - name: Commit and Push
         run: |
@@ -41,7 +43,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add all_tickers_3_years_history.csv pan1_2year_history.csv pan2_2year_history.csv
+          git add all_tickers_3_years_history.csv pan1_2year_history.csv pan2_2year_history.csv category_history.json indicators_history.json backtesting_results.json
           
           # Only commit if the file was actually created/changed
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Initial Historical Load" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update JSON DB [skip ci]" && git push)
