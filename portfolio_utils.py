@@ -1404,7 +1404,7 @@ def run_portfolio(tickers, five_days_history_filename, target_history_filename):
     print("Uploading files to Dropbox...")
     folder_link = ""
     # Upload each temporary plot file to the appropriate Dropbox subfolder
-    if 'temp_plot_files' in globals():
+    if 'temp_plot_files' in locals():
         for plot_file in temp_plot_files:
             ticker = plot_file.split('_')[0]
             ticker_latest_recommendation_row = filtered_latest_two_days_df[filtered_latest_two_days_df['Ticker'] == ticker].tail(1)
