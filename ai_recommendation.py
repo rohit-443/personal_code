@@ -122,7 +122,7 @@ def run_ai_recommendations():
 
     # Call Gemini API
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash', tools='google_search')
+    model = genai.GenerativeModel('gemini-3.1-flash-lite', tools='google_search')
 
     prompt = f"""You are an elite quantitative AI stock analyst focusing on the Indian equity market (NSE). 
 I have a list of shortlisted stocks with their current momentum category (Diamond/Gold/Silver), their historical propensity to upgrade categories (e.g. jumping from Silver to Diamond), their latest technical indicators, and their algorithmic backtesting win-rate.
