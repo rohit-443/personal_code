@@ -318,6 +318,8 @@ def run_portfolio(tickers, five_days_history_filename, target_history_filename):
     
     # Now apply the filtering logic and categorization to the latest two days data
     filtered_latest_two_days_df = pd.DataFrame()
+    all_latest_recommendations_list = []
+    all_latest_indicators_list = []
     
     for ticker in latest_two_days_df['Ticker'].unique():
         ticker_df = latest_two_days_df[latest_two_days_df['Ticker'] == ticker].copy()
@@ -375,6 +377,14 @@ def run_portfolio(tickers, five_days_history_filename, target_history_filename):
         )
     
     
+        # Collect for JSON history
+        latest_row = ticker_df.iloc[-1]
+        all_latest_recommendations_list.append({'Date': latest_row['Date'].strftime('%Y-%m-%d'), 'Ticker': latest_row['Ticker'], 'Recommendation': latest_row['Recommendation']})
+        indi_dict = latest_row.to_dict()
+        indi_dict['Date'] = latest_row['Date'].strftime('%Y-%m-%d')
+        # convert dates in dict to string to be json serializable
+        all_latest_indicators_list.append(indi_dict)
+
         # Filter for rows with 'Diamond Pick', 'Golden Pick', or 'Silver Pick'
         filtered_df = ticker_df[(ticker_df['Recommendation'] == 'Diamond Pick') | (ticker_df['Recommendation'] == 'Golden Pick') | (ticker_df['Recommendation'] == 'Silver Pick')]
     
@@ -384,6 +394,44 @@ def run_portfolio(tickers, five_days_history_filename, target_history_filename):
     
     # Display the tickers, dates, and recommendations
     print(filtered_latest_two_days_df[['Date', 'Ticker', 'RSI', 'MACD', 'MACD_Signal', 'Williams_%R', 'cci', 'satisfied_conditions_count', 'Recommendation', 'Satisfied_Conditions_Description']])
+
+    # Save to category_history.json
+    import json
+    try:
+        with open('category_history.json', 'r') as f:
+            exist_cats = json.load(f)
+    except FileNotFoundError:
+        exist_cats = []
+    
+    current_date_str = all_latest_recommendations_list[0]['Date'] if all_latest_recommendations_list else None
+    current_tickers = set(x['Ticker'] for x in all_latest_recommendations_list)
+    exist_cats = [x for x in exist_cats if not (x['Date'] == current_date_str and x['Ticker'] in current_tickers)]
+    exist_cats.extend(all_latest_recommendations_list)
+    with open('category_history.json', 'w') as f:
+        json.dump(exist_cats, f, indent=4)
+        
+    # Save to indicators_history.json
+    try:
+        with open('indicators_history.json', 'r') as f:
+            exist_indis = json.load(f)
+    except FileNotFoundError:
+        exist_indis = []
+    exist_indis = [x for x in exist_indis if not (x['Date'] == current_date_str and x['Ticker'] in current_tickers)]
+    
+    # clean na values for serialization
+    clean_indis = []
+    for indi in all_latest_indicators_list:
+        clean_indi = {}
+        for k, v in indi.items():
+             if pd.isna(v): clean_indi[k] = None
+             elif isinstance(v, (np.integer, np.int64)): clean_indi[k] = int(v)
+             elif isinstance(v, (np.floating, np.float64)): clean_indi[k] = float(v)
+             else: clean_indi[k] = str(v) # fallback
+        clean_indis.append(clean_indi)
+
+    exist_indis.extend(clean_indis)
+    with open('indicators_history.json', 'w') as f:
+        json.dump(exist_indis, f, indent=4)
     
     """# Task
     Send an email to "jonnadularohit@gmail.com" containing the shortlisted tickers from the `filtered_latest_two_days_df` DataFrame and their corresponding technical indicator plots, using the Gmail address and app password stored in Colab secrets.
@@ -1449,6 +1497,38 @@ def run_portfolio(tickers, five_days_history_filename, target_history_filename):
     """
     
     
+    # Save backtesting results
+    import json
+    try:
+        with open('backtesting_results.json', 'r') as f:
+            bt_results = json.load(f)
+    except FileNotFoundError:
+        bt_results = []
+        
+    run_date_str = datetime.now().strftime('%Y-%m-%d')
+    # clear old entries for this run date and these tickers (assuming partial runs)
+    current_tickers_set = set(tickers)
+    bt_results = [x for x in bt_results if not (x.get('run_date') == run_date_str and x.get('Ticker') in current_tickers_set)]
+
+    if 'performance_metrics_by_ticker_recommendation_df' in locals() and not performance_metrics_by_ticker_recommendation_df.empty:
+        perf_records = performance_metrics_by_ticker_recommendation_df.reset_index().to_dict(orient='records')
+        for r in perf_records:
+            clean_r = {k: (None if pd.isna(v) else float(v) if isinstance(v, (np.floating, np.float64)) else int(v) if isinstance(v, (np.integer, np.int64)) else v) for k, v in r.items()}
+            clean_r['run_date'] = run_date_str
+            clean_r['Metric_Type'] = 'Original Picks'
+            bt_results.append(clean_r)
+            
+    if 'signal_performance_by_ticker_df' in locals() and not signal_performance_by_ticker_df.empty:
+         sig_records = signal_performance_by_ticker_df.reset_index().to_dict(orient='records')
+         for r in sig_records:
+             clean_r = {k: (None if pd.isna(v) else float(v) if isinstance(v, (np.floating, np.float64)) else int(v) if isinstance(v, (np.integer, np.int64)) else v) for k, v in r.items()}
+             clean_r['run_date'] = run_date_str
+             clean_r['Metric_Type'] = 'New Signals'
+             bt_results.append(clean_r)
+
+    with open('backtesting_results.json', 'w') as f:
+        json.dump(bt_results, f, indent=4)
+
     # Email details
     email_list = [e.strip() for e in gmail_address.split(",")]
     sender_email = email_list[0] # The first email logs into SMTP
