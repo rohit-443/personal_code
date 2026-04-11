@@ -92,7 +92,12 @@ def run_ai_recommendations():
             t_ind = latest_ind[latest_ind['Ticker'] == ticker]
             if not t_ind.empty:
                 r = t_ind.iloc[0]
-                indi_strs = f"RSI: {r.get('RSI', 'N/A')}, MACD: {r.get('MACD', 'N/A')}, Williams %R: {r.get('Williams_%R', 'N/A')}, Vol: {r.get('Volume', 'N/A')}"
+                def fmt(val):
+                    try:
+                        return f"{float(val):.2f}"
+                    except (ValueError, TypeError):
+                        return "N/A"
+                indi_strs = f"Price: {fmt(r.get('Close'))}, RSI: {fmt(r.get('RSI'))}, MACD: {fmt(r.get('MACD'))}, WM%R: {fmt(r.get('Williams_%R'))}, SMA20: {fmt(r.get('SMA20'))}, SMA50: {fmt(r.get('SMA50'))}, SMA200: {fmt(r.get('SMA200'))}, A/D Line: {fmt(r.get('AD_Line'))}"
                 
         # Format backtest
         bt_strs = "N/A"
@@ -127,10 +132,11 @@ I have a list of shortlisted stocks with their current momentum category (Diamon
 </SHORTLISTED_STOCKS_DATA>
 
 Your Instructions:
-1. Scrutinize the algorithmic data above. Prioritize stocks with strong Backtesting Win Rates (>60% if possible), a history of upward category jumps, and bullish momentum indicators.
-2. Use Google Search to fetch the extremely LATEST FOMO news, earnings catalysts, or sector rotations affecting these specific tickers.
-3. Merge the quantitative signals with the real-world news catalysts to select the ABSOLUTE BEST "sure shot" stock recommendations for the very next trading session. Ignore the mediocre ones.
-4. Output a clean HTML email body consisting of:
+1. Scrutinize the algorithmic data above. Prioritize stocks with strong Backtesting Win Rates (>60% if possible) and a history of upward category jumps.
+2. Evaluate the Expanded Technicals: Ensure the current `Price` is logically supported by its moving averages (`SMA20`, `SMA50`, `SMA200`). Strong recommendations should ideally be above their SMA200 (long term safety) and show volume accumulation validation via the `A/D Line`.
+3. Use Google Search to fetch the extremely LATEST FOMO news, earnings catalysts, or sector rotations affecting these specific tickers in the Indian Stock Market. Note: Add '.NS' or 'NSE' for relevance.
+4. Merge the quantitative signals with the real-world news catalysts to select the ABSOLUTE BEST "sure shot" stock recommendations for the very next trading session. Ignore the mediocre ones.
+5. Output a clean HTML email body consisting of:
     - An introductory sentence.
     - A list or table of the highly confident "Sure Shot" picks.
     - For each pick, explain WHY it was selected (cite the algorithm stats + the fresh news sentiment).
