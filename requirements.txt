@@ -5,4 +5,4 @@ matplotlib
 scipy
 dropbox
 python-docx
-google-generativeai
+google-genai

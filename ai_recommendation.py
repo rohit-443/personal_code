@@ -1,7 +1,8 @@
 import json
 import pandas as pd
 import os
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -121,8 +122,7 @@ def run_ai_recommendations():
         return
 
     # Call Gemini API
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-3.1-flash-lite', tools='google_search')
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""You are an elite quantitative AI stock analyst focusing on the Indian equity market (NSE). 
 I have a list of shortlisted stocks with their current momentum category (Diamond/Gold/Silver), their historical propensity to upgrade categories (e.g. jumping from Silver to Diamond), their latest technical indicators, and their algorithmic backtesting win-rate.
@@ -143,8 +143,27 @@ Your Instructions:
     - Do NOT output ```html markdown code blocks. Just output raw HTML tags that can be directly embedded into an email.
 """
 
-    response = model.generate_content(prompt)
-    html_body = response.text
+    config = types.GenerateContentConfig(
+        tools=[{"google_search": {}}]
+    )
+    
+    try:
+        response = client.models.generate_content(
+            model='gemini-3.1-flash-lite',
+            contents=prompt,
+            config=config
+        )
+        html_body = response.text
+    except Exception as e:
+        print(f"Error calling Gemini: {e}")
+        # fallback to flash macro if 3.1-flash-lite is not available to the key
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=config
+        )
+        html_body = response.text
+
     if html_body.startswith('```html'):
         html_body = html_body[7:]
     if html_body.endswith('```'):

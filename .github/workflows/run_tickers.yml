@@ -20,7 +20,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Libs
-        run: pip install yfinance pandas google-generativeai
+        run: pip install yfinance pandas google-genai
 
       - name: Run Data Collection
         env:
