@@ -132,11 +132,13 @@ I have a list of shortlisted stocks with their current momentum category (Diamon
 </SHORTLISTED_STOCKS_DATA>
 
 Your Instructions:
-1. Scrutinize the algorithmic data above. Prioritize stocks with strong Backtesting Win Rates (>60% if possible) and a history of upward category jumps.
-2. Evaluate the Expanded Technicals: Ensure the current `Price` is logically supported by its moving averages (`SMA20`, `SMA50`, `SMA200`). Strong recommendations should ideally be above their SMA200 (long term safety) and show volume accumulation validation via the `A/D Line`.
-3. Use Google Search to fetch the extremely LATEST FOMO news, earnings catalysts, or sector rotations affecting these specific tickers in the Indian Stock Market. Note: Add '.NS' or 'NSE' for relevance.
-4. Merge the quantitative signals with the real-world news catalysts to select the ABSOLUTE BEST "sure shot" stock recommendations for the very next trading session. Ignore the mediocre ones.
-5. Output a clean HTML email body consisting of:
+1. Core Strategy focus: Our goal is to find stocks that have massive potential to JUMP from a lower momentum category (Silver) to an upper category (Gold/Diamond) *before* they peak.
+2. OVERBOUGHT REJECTION: If a stock is already a "Diamond Pick" AND its Williams %R is greater (less negative) than -20 (e.g., -15, -10, 0), it is OVERBOUGHT and likely to fall in the next 1-2 sessions. DO NOT recommend these.
+3. PRIORITIZE SILVER/GOLD STOCKS: Focus heavily on "Silver Pick" (or "Golden Pick") stocks that maintain strong Backtesting Win Rates (>60%), have a proven history of upward category jumps, and possess strong momentum indicators that are *not yet overbought*.
+4. Evaluate the Expanded Technicals: Ensure the current `Price` is logically supported by its moving averages (`SMA20`, `SMA50`, `SMA200`). Strong recommendations should ideally be above their SMA200 (long term safety) and show volume accumulation validation via the `A/D Line`.
+5. Use Google Search to fetch the extremely LATEST FOMO news, earnings catalysts, or sector rotations affecting these specific tickers in the Indian Stock Market. Note: Add '.NS' or 'NSE' for relevance.
+6. Merge the quantitative signals with the real-world news catalysts to select the ABSOLUTE BEST "sure shot" stock recommendations for the very next trading session. Ignore the mediocre ones.
+7. Output a clean HTML email body consisting of:
     - An introductory sentence.
     - A list or table of the highly confident "Sure Shot" picks.
     - For each pick, explain WHY it was selected (cite the algorithm stats + the fresh news sentiment).
