@@ -1,12 +1,38 @@
 import json
 import pandas as pd
 import os
+from html import escape
 from google import genai
 from google.genai import types
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+
+
+def build_fallback_html(shortlisted_rows, failure_reason):
+    html_parts = [
+        "<html><body>",
+        "<p>AI recommendation generation was skipped because Gemini was unavailable. Sending the shortlisted stocks summary instead.</p>",
+        f"<p><strong>Reason:</strong> {escape(failure_reason)}</p>",
+        "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse: collapse;'>",
+        "<tr><th>Ticker</th><th>Category</th><th>Indicators</th><th>Backtest</th></tr>",
+    ]
+
+    for row in shortlisted_rows:
+        html_parts.append(
+            "<tr>"
+            f"<td>{escape(row['ticker'])}</td>"
+            f"<td>{escape(row['category'])}</td>"
+            f"<td>{escape(row['indicators'])}</td>"
+            f"<td>{escape(row['backtest'])}</td>"
+            "</tr>"
+        )
+
+    html_parts.append("</table>")
+    html_parts.append("<p>Workflow continued successfully without AI-generated commentary.</p>")
+    html_parts.append("</body></html>")
+    return "".join(html_parts)
 
 def run_ai_recommendations():
     print("Starting AI Recommendation Script...")
@@ -83,6 +109,7 @@ def run_ai_recommendations():
 
     # 5. Format the context for Gemini
     prompt_data = []
+    fallback_rows = []
     for ticker in shortlisted:
         rec = latest_df[latest_df['Ticker'] == ticker]['Recommendation'].iloc[0]
         jumps = transition_counts.get(ticker, {})
@@ -109,6 +136,12 @@ def run_ai_recommendations():
                 bt_strs = f"Win Rate: {r2.get('Win Rate (%)', 'N/A')}%, Avg Win Return: {r2.get('Average Winning Return (%)', 'N/A')}%"
                 
         prompt_data.append(f"- Ticker: {ticker} | Category: {rec} | Jumps History: {jumps} | Latest Techs: {indi_strs} | Backtest: {bt_strs}")
+        fallback_rows.append({
+            'ticker': ticker,
+            'category': rec,
+            'indicators': indi_strs,
+            'backtest': bt_strs,
+        })
 
     prompt_context = "\n".join(prompt_data)
     print(f"Found {len(shortlisted)} tickers to analyze. Calling Gemini...")
@@ -117,12 +150,7 @@ def run_ai_recommendations():
     if not api_key:
         api_key = os.environ.get("GEMINI_API_KEY")
         
-    if not api_key:
-        print("Error: Gemini API Key not found.")
-        return
-
-    # Call Gemini API
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key) if api_key else None
 
     prompt = f"""You are an elite quantitative AI stock analyst focusing on the Indian equity market (NSE). 
 I have a list of shortlisted stocks with their current momentum category (Diamond/Gold/Silver), their historical propensity to upgrade categories (e.g. jumping from Silver to Diamond), their latest technical indicators, and their algorithmic backtesting win-rate.
@@ -148,23 +176,24 @@ Your Instructions:
     config = types.GenerateContentConfig(
         tools=[{"google_search": {}}]
     )
-    
-    try:
-        response = client.models.generate_content(
-            model='gemini-3.1-flash-lite',
-            contents=prompt,
-            config=config
-        )
-        html_body = response.text
-    except Exception as e:
-        print(f"Error calling Gemini: {e}")
-        # fallback to flash macro if 3.1-flash-lite is not available to the key
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=config
-        )
-        html_body = response.text
+
+    html_body = None
+    if not client:
+        failure_reason = "Gemini API key not found"
+        print(f"Skipping Gemini request: {failure_reason}.")
+        html_body = build_fallback_html(fallback_rows, failure_reason)
+    else:
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+                config=config
+            )
+            html_body = response.text
+        except Exception as e:
+            failure_reason = str(e)
+            print(f"Gemini request failed. Continuing without AI output: {failure_reason}")
+            html_body = build_fallback_html(fallback_rows, failure_reason)
 
     if html_body.startswith('```html'):
         html_body = html_body[7:]
